@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sql--dnmay25demows",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/c75f6bab-9d6a-4ee1-b464-a3beae73063c/resourceGroups/dnmay25Demo/providers/Microsoft.Synapse/workspaces/dnmay25demows",
+		"groupId": "sql",
+		"fqdns": [
+			"dnmay25demows.fc016bcc-a6cb-4451-adc0-e605170f7b22.sql.azuresynapse.net"
+		]
+	}
+}
