@@ -186,7 +186,6 @@
 					"cols = ['vendorID', 'passengerCount', 'startLon', 'startLat', 'endLon', 'endLat', 'rateCodeId', 'storeAndFwdFlag', 'paymentType', 'fareAmount', 'extra', 'mtaTax', 'improvementSurcharge', 'tipAmount', 'tollsAmount', 'totalAmount']\r\n",
 					"sampled_taxi_pd_df.drop(cols, axis=1, inplace=True)\r\n",
 					"\r\n",
-					"sampled_taxi_pd_df.head(10)\r\n",
 					""
 				],
 				"execution_count": null
@@ -206,11 +205,51 @@
 					"collapsed": true
 				},
 				"source": [
-					"# Add some additional columns\r\n",
-					"sampled_taxi_pd_df['puDay'] = ''\r\n",
-					"sampled_taxi_pd_df['puHour'] = ''"
+					"sampled_taxi_pd_df.head(10)"
 				],
-				"execution_count": 17
+				"execution_count": 22
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"Add the date part columns to the individual demand and supply dataframes"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Add some additional columns\r\n",
+					"def gethour(ts):\r\n",
+					"    return ts.hour\r\n",
+					"\r\n",
+					"def getday(ts):\r\n",
+					"    return ts.day\r\n",
+					"\r\n",
+					"sampled_taxi_pd_df['puDay'] = sampled_taxi_pd_df['tpepPickupDateTime'].apply(getday)\r\n",
+					"sampled_taxi_pd_df['puHour'] = sampled_taxi_pd_df['tpepPickupDateTime'].apply(gethour)\r\n",
+					"\r\n",
+					"sampled_taxi_pd_df.head(10)"
+				],
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -232,6 +271,26 @@
 					"    print(col)"
 				],
 				"execution_count": 18
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Populate our new columns\r\n",
+					""
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -275,6 +334,26 @@
 					"triplength_df.count()"
 				],
 				"execution_count": 21
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Amazing - now create demand data frame\r\n",
+					""
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "markdown",
