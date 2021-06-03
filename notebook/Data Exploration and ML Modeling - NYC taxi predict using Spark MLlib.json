@@ -62,6 +62,7 @@
 			{
 				"cell_type": "code",
 				"source": [
+					"# spark ML imports\n",
 					"import matplotlib.pyplot as plt\n",
 					"\n",
 					"from pyspark.sql.functions import unix_timestamp\n",
@@ -79,6 +80,38 @@
 					"from pyspark.ml.evaluation import BinaryClassificationEvaluator"
 				],
 				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# additional imports for y=this model\r\n",
+					"import warnings\r\n",
+					"import itertools\r\n",
+					"import numpy as np\r\n",
+					"import matplotlib.pyplot as plt\r\n",
+					"warnings.filterwarnings(\"ignore\")\r\n",
+					"plt.style.use('fivethirtyeight')\r\n",
+					"import pandas as pd\r\n",
+					"import statsmodels.api as sm\r\n",
+					"\r\n",
+					"plt.rcParams['axes.labelsize'] = 14\r\n",
+					"plt.rcParams['xtick.labelsize'] = 12\r\n",
+					"plt.rcParams['ytick.labelsize'] = 12\r\n",
+					"plt.rcParams['text.color'] = 'k'"
+				],
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
@@ -111,7 +144,137 @@
 					"#To make development easier, faster and less expensive downsample for now\n",
 					"sampled_taxi_df = nyc_tlc_df.sample(True, 0.001, seed=1234)"
 				],
-				"execution_count": 3
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"#The charting package needs a Pandas dataframe or numpy array do the conversion\r\n",
+					"sampled_taxi_pd_df = sampled_taxi_df.toPandas()\r\n",
+					"sampled_taxi_pd_df['tpepPickupDateTime'].min(), sampled_taxi_pd_df['tpepPickupDateTime'].max()"
+				],
+				"execution_count": 11
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Ge rid of the columns we dont need and see whats left\r\n",
+					"cols = ['vendorID', 'passengerCount', 'startLon', 'startLat', 'endLon', 'endLat', 'rateCodeId', 'storeAndFwdFlag', 'paymentType', 'fareAmount', 'extra', 'mtaTax', 'improvementSurcharge', 'tipAmount', 'tollsAmount', 'totalAmount']\r\n",
+					"sampled_taxi_pd_df.drop(cols, axis=1, inplace=True)\r\n",
+					"\r\n",
+					"sampled_taxi_pd_df.head(10)\r\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Add some additional columns\r\n",
+					"sampled_taxi_pd_df['puDay'] = ''\r\n",
+					"sampled_taxi_pd_df['puHour'] = ''"
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# see what we have left\r\n",
+					"for col in sampled_taxi_pd_df.columns:\r\n",
+					"    print(col)"
+				],
+				"execution_count": 18
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Lets create the inter zone trip length dataframe\r\n",
+					"# So we need an average trip length per start zone - end zone pair \r\n",
+					"triplength_df = sampled_taxi_pd_df.groupby(['puLocationId', 'doLocationId']).agg({'tripDistance': ['mean']})\r\n",
+					"triplength_df = triplength_df.reset_index()\r\n",
+					"triplength_df.head(10)"
+				],
+				"execution_count": 20
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# see how many we have \r\n",
+					"triplength_df.count()"
+				],
+				"execution_count": 21
 			},
 			{
 				"cell_type": "markdown",
@@ -124,9 +287,6 @@
 			{
 				"cell_type": "code",
 				"source": [
-					"#The charting package needs a Pandas dataframe or numpy array do the conversion\n",
-					"sampled_taxi_pd_df = sampled_taxi_df.toPandas()\n",
-					"\n",
 					"# Look at tips by amount count histogram\n",
 					"ax1 = sampled_taxi_pd_df['tipAmount'].plot(kind='hist', bins=25, facecolor='lightblue')\n",
 					"ax1.set_title('Tip amount distribution')\n",
@@ -152,7 +312,7 @@
 					"plt.suptitle('')\n",
 					"plt.show()"
 				],
-				"execution_count": 4
+				"execution_count": 8
 			},
 			{
 				"cell_type": "markdown",
