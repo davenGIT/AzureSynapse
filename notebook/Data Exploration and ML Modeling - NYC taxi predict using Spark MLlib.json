@@ -111,7 +111,7 @@
 					"plt.rcParams['ytick.labelsize'] = 12\r\n",
 					"plt.rcParams['text.color'] = 'k'"
 				],
-				"execution_count": 3
+				"execution_count": 2
 			},
 			{
 				"cell_type": "markdown",
@@ -136,7 +136,7 @@
 					"nyc_tlc = NycTlcYellow(start_date=start_date, end_date=end_date)\n",
 					"nyc_tlc_df = nyc_tlc.to_spark_dataframe()"
 				],
-				"execution_count": 2
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -165,7 +165,7 @@
 					"sampled_taxi_pd_df = sampled_taxi_df.toPandas()\r\n",
 					"sampled_taxi_pd_df['tpepPickupDateTime'].min(), sampled_taxi_pd_df['tpepPickupDateTime'].max()"
 				],
-				"execution_count": 11
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -188,7 +188,7 @@
 					"\r\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -207,7 +207,7 @@
 				"source": [
 					"sampled_taxi_pd_df.head(10)"
 				],
-				"execution_count": 22
+				"execution_count": 7
 			},
 			{
 				"cell_type": "markdown",
@@ -249,7 +249,7 @@
 					"\r\n",
 					"sampled_taxi_pd_df.head(10)"
 				],
-				"execution_count": 24
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -270,27 +270,7 @@
 					"for col in sampled_taxi_pd_df.columns:\r\n",
 					"    print(col)"
 				],
-				"execution_count": 18
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"collapsed": true
-				},
-				"source": [
-					"# Populate our new columns\r\n",
-					""
-				],
-				"execution_count": null
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -313,7 +293,7 @@
 					"triplength_df = triplength_df.reset_index()\r\n",
 					"triplength_df.head(10)"
 				],
-				"execution_count": 20
+				"execution_count": 10
 			},
 			{
 				"cell_type": "code",
@@ -333,7 +313,7 @@
 					"# see how many we have \r\n",
 					"triplength_df.count()"
 				],
-				"execution_count": 21
+				"execution_count": 11
 			},
 			{
 				"cell_type": "code",
@@ -391,7 +371,7 @@
 					"plt.suptitle('')\n",
 					"plt.show()"
 				],
-				"execution_count": 8
+				"execution_count": 12
 			},
 			{
 				"cell_type": "markdown",
