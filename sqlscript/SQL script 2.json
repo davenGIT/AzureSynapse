@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"content": {
+			"query": "use nyctaxiDB\n\n--Create aparquet file format\nCREATE EXTERNAL FILE FORMAT taxiData_file_format_GZIP\nWITH\n(  \n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec'\n);\n\n-- Create the aggregated data external table (limit to 2018 while testing)\nCREATE EXTERNAL TABLE tripDistanceUploaded\n(\n    TripIndex INT,\n    PULocationID INT,\n    DOLocationID INT,\n    AverageTrip FLOAT\n)\nWITH (\n    LOCATION = 'uploadedData/',\n    DATA_SOURCE = taxiDataDemo,  \n    FILE_FORMAT = taxiData_file_format_GZIP\n)  \n\n--DROP EXTERNAL TABLE tripDistanceUploaded\n\nSelect * from tripDistanceUploaded\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "Built-in",
+				"databaseName": "nyctaxiDB"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
