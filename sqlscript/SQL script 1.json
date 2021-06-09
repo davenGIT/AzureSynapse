@@ -2,7 +2,7 @@
 	"name": "SQL script 1",
 	"properties": {
 		"content": {
-			"query": "-- This is auto-generated code\nSELECT\n    TOP 10 *\nFROM\n    OPENROWSET(\n        BULK     'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'parquet'\n    ) AS [result]\n WHERE puLocationID IS NOT NULL    \n AND doLocationID IS NOT NULL",
+			"query": "\nEXEC sp_describe_first_result_set N'\nSELECT\n    tpepPickupDateTime, tpepDropOffDateTime, tripDistance, puLocationId, doLocationId \nFROM\n    OPENROWSET(\n        BULK     ''https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet'',\n        FORMAT = ''parquet''\n    ) AS [result]\n WHERE puLocationID IS NOT NULL    \n AND doLocationID IS NOT NULL'\n\n\n ",
 			"metadata": {
 				"language": "sql"
 			},
