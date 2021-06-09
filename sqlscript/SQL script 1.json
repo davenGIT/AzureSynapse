@@ -2,13 +2,13 @@
 	"name": "SQL script 1",
 	"properties": {
 		"content": {
-			"query": "\nEXEC sp_describe_first_result_set N'\nSELECT\n    tpepPickupDateTime, tpepDropOffDateTime, tripDistance, puLocationId, doLocationId \nFROM\n    OPENROWSET(\n        BULK     ''https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet'',\n        FORMAT = ''parquet''\n    ) AS [result]\n WHERE puLocationID IS NOT NULL    \n AND doLocationID IS NOT NULL'\n\n\n ",
+			"query": "\n-- Find out what the table contains\nEXEC sp_describe_first_result_set N'\nSELECT\n    TOP 1000 * \nFROM\n    OPENROWSET(\n        BULK     ''https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet'',\n        FORMAT = ''parquet''\n    ) AS [result]'\n\n-- Check your selection\nSELECT\n    TOP 1000 tpepPickupDateTime, tpepDropOffDateTime, tripDistance, puLocationId, doLocationId \nFROM\n    OPENROWSET(\n        BULK     'https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow/puYear=*/puMonth=*/*.parquet',\n        FORMAT = 'parquet'\n    ) AS [result]\nWHERE tpepPickupDateTime IS NOT NULL\n AND tpepDropOffDateTime IS NOT NULL\n AND puLocationID IS NOT NULL    \n AND doLocationID IS NOT NULL\n\n -- Create a location for your data source\nCREATE EXTERNAL DATA SOURCE taxiDataDemo WITH (\n    LOCATION = 'https://dnmay25gen2.blob.core.windows.net/dnmay25users/user'\n);\n\n--Create aparquet file format\nCREATE EXTERNAL FILE FORMAT taxiData_file_format\nWITH\n(  \n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n);\n\n\n\n\n\n ",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
 				"poolName": "Built-in",
-				"databaseName": "master"
+				"databaseName": "nyctaxiDB"
 			},
 			"resultLimit": 5000
 		},
