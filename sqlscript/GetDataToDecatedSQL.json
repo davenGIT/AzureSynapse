@@ -1,0 +1,17 @@
+{
+	"name": "GetDataToDecatedSQL",
+	"properties": {
+		"content": {
+			"query": "Use Master\n\nCREATE DATABASE nycTaxiFcst \nCOLLATE Latin1_General_100_CI_AI_SC_UTF8;\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "dn25MaySQLPool",
+				"databaseName": "dn25MaySQLPool"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
