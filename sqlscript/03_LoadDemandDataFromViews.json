@@ -1,0 +1,17 @@
+{
+	"name": "03_LoadDemandDataFromViews",
+	"properties": {
+		"content": {
+			"query": "\n\n-- Create the aggregated demand external table Zone level\n\nCREATE EXTERNAL TABLE HourlyZoneDemand\nWITH (\n    LOCATION = 'agg_Zonedemand/',\n    DATA_SOURCE = taxiDataDemo,  \n    FILE_FORMAT = taxiData_file_format\n)  \nAS\nSELECT * from dbo.vHourlyZoneDemand\n\n-- Create the aggregated demand external table Borough level\nCREATE EXTERNAL TABLE HourlyBoroughDemand\nWITH (\n    LOCATION = 'agg_Boroughdemand/',\n    DATA_SOURCE = taxiDataDemo,  \n    FILE_FORMAT = taxiData_file_format\n)  \nAS\nSELECT * from dbo.vHourlyBoroughDemand\n\n\n-- Create the aggregated supply external table \nCREATE EXTERNAL TABLE supplySummary\nWITH (\n    LOCATION = 'agg_supply/',\n    DATA_SOURCE = taxiDataDemo,  \n    FILE_FORMAT = taxiData_file_format\n)  \nAS\nSELECT * from vHourlySupply\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"poolName": "Built-in",
+				"databaseName": "nyctaxiDB"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
