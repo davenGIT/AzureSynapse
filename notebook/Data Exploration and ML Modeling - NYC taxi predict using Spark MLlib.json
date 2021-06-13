@@ -133,18 +133,44 @@
 							"deleting": false
 						}
 					},
-					"microsoft": {
-						"language": "scala"
-					},
 					"collapsed": true
 				},
 				"source": [
-					"%%spark\r\n",
-					"val scalaDataFrame = spark.read.sqlanalytics(\"nyctaxiDB.dbo.ZoneDistances\")\r\n",
-					"\r\n",
 					""
 				],
-				"execution_count": 9
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Write data to Azure Storage Blob\r\n",
+					"\r\n",
+					"Synapse leverage **Shared access signature (SAS)** to access Azure Blob Storage. To avoid exposing SAS keys in the code, we recommend creating a new linked service in Synapse workspace to the Azure Blob Storage account you want to access.\r\n",
+					"\r\n",
+					"Follow these steps to add a new linked service for an Azure Blob Storage account:\r\n",
+					"\r\n",
+					"1. Open the [Azure Synapse Studio](https://web.azuresynapse.net/).\r\n",
+					"2. Select **Manage** from the left panel and select **Linked services** under the **External connections**.\r\n",
+					"3. Search **Azure Blob Storage** in the **New linked Service** panel on the right.\r\n",
+					"4. Select **Continue**.\r\n",
+					"5. Select the Azure Blob Storage Account to access and configure the linked service name. Suggest using **Account key** for the **Authentication method**.\r\n",
+					"6. Select **Test connection** to validate the settings are correct.\r\n",
+					"7. Select **Create** first and click **Publish all** to save your changes.\r\n",
+					"\r\n",
+					"You can access data on Azure Blob Storage with Synapse Spark via following URL:\r\n",
+					"\r\n",
+					"```wasb[s]://<container_name>@<storage_account_name>.blob.core.windows.net/```\r\n",
+					"\r\n",
+					"Please make sure to allow contatiner level read and write permission. Fill in the access info for your Azure storage blob in the cell below. \r\n",
+					""
+				]
 			},
 			{
 				"cell_type": "code",
@@ -161,10 +187,163 @@
 					"collapsed": true
 				},
 				"source": [
-					"scalaDataFrame.createOrReplaceTempView( \"zoneDistances\" )\r\n",
+					"from pyspark.sql import SparkSession\r\n",
+					"from pyspark.sql.types import *\r\n",
 					"\r\n",
+					"# Azure storage access info\r\n",
+					"blob_account_name = 'Your blob name' # replace with your blob name\r\n",
+					"blob_container_name = 'Your container name' # replace with your container name\r\n",
+					"blob_relative_path = 'Your relative path' # replace with your relative folder path\r\n",
+					"linked_service_name = 'Your linked service name' # replace with your linked service name\r\n",
 					"\r\n",
+					"blob_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Allow SPARK to access from Blob remotely\r\n",
+					"wasbs_path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (blob_container_name, blob_account_name, blob_relative_path)\r\n",
+					"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name), blob_sas_token)\r\n",
+					"print('Remote blob path: ' + wasbs_path)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"parquet_path = wasbs_path + 'holiday.parquet'"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"df_parquet = spark.read.parquet(parquet_path)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"#-------------------------------------------------------------------------------------------------------------------------"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"file_location = \"https://dnmay25gen2.blob.core.windows.net/dnmay25users/user/ZoneLookup/\"\r\n",
 					"\r\n",
+					"parquet_path = 'wasbs://dnmay25users@dnmay25gen2.blob.core.windows.net/user/ZoneLookup/'\r\n",
+					"df_parquet = spark.read.parquet(parquet_path)"
+				],
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "scala"
+					},
+					"collapsed": true
+				},
+				"source": [
+					"%%spark\r\n",
+					"val scalaDataFrame = spark.read.parquet(\"https://dnmay25gen2.blob.core.windows.net/dnmay25users/user/ZoneLookup/\")\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"microsoft": {
+						"language": "sparksql"
+					},
+					"collapsed": true
+				},
+				"source": [
 					"%%sql\r\n",
 					"SELECT * FROM mydataframetable"
 				],
@@ -219,13 +398,8 @@
 			{
 				"cell_type": "code",
 				"source": [
-					"# Import NYC yellow cab data from Azure Open Datasets\n",
-					"from azureml.opendatasets import NycTlcYellow\n",
-					"\n",
 					"from datetime import datetime\n",
 					"from dateutil import parser\n",
-					"\n",
-					"\n",
 					"\n",
 					"\n",
 					"end_date = parser.parse('2018-05-08 00:00:00')\n",
