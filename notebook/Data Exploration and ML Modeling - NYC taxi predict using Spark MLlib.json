@@ -277,9 +277,28 @@
 					"collapsed": true
 				},
 				"source": [
-					"#-------------------------------------------------------------------------------------------------------------------------"
+					"#--------- 5126794 -----------------------------------------------------------------"
 				],
 				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"print('the size of the data is: %d rows and  %d columns' % df_parquet.shape)"
+				],
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
