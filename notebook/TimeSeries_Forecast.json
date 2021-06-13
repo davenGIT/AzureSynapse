@@ -91,6 +91,7 @@
 					"import itertools\r\n",
 					"import numpy as np\r\n",
 					"import matplotlib.pyplot as plt\r\n",
+					"import random\r\n",
 					"\r\n",
 					"warnings.filterwarnings(\"ignore\")\r\n",
 					"plt.style.use('fivethirtyeight')\r\n",
@@ -102,7 +103,7 @@
 					"plt.rcParams['ytick.labelsize'] = 12\r\n",
 					"plt.rcParams['text.color'] = 'k'"
 				],
-				"execution_count": 32
+				"execution_count": 19
 			},
 			{
 				"cell_type": "markdown",
@@ -168,7 +169,7 @@
 					"\r\n",
 					"blob_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
 				],
-				"execution_count": 20
+				"execution_count": 3
 			},
 			{
 				"cell_type": "code",
@@ -190,7 +191,7 @@
 					"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name), blob_sas_token)\r\n",
 					"print('Remote blob path: ' + wasbs_path)"
 				],
-				"execution_count": 21
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -210,7 +211,7 @@
 					"# Use a wildcard to load all the parquet files in the folder to a data frame\r\n",
 					"demand_df = spark.read.parquet(wasbs_path + '17EC7D74-3ACC-4004-8CB5-BAA4F860E162_*.parquet')"
 				],
-				"execution_count": 41
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -230,7 +231,7 @@
 					"# Get data into a pandas dataframe\r\n",
 					"demand = demand_df.toPandas()"
 				],
-				"execution_count": 42
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -251,7 +252,7 @@
 				},
 				"source": [
 					"%%sql\r\n",
-					"SELECT Count(*) as TotalRecs, max(boroughID) as NumBoroughs FROM [nyctaxiDB].[dbo].[HourlyBoroughDemand]"
+					"SELECT Count(*) FROM [nyctaxiDB].[dbo].[HourlyBoroughDemand]"
 				],
 				"execution_count": null
 			},
@@ -273,15 +274,27 @@
 					"# A quick check - is the record count the same as SQL   \r\n",
 					"demand.info() "
 				],
-				"execution_count": 43
+				"execution_count": 16
 			},
 			{
 				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
 				"source": [
-					"# Work with a subset\n",
-					"sampled_demand = demand.sample(True, 0.001, seed=1234)"
+					"# Run for each borough 1 - 7\r\n",
+					"borough = demand.loc[demand['BoroughID'] == 1]"
 				],
-				"execution_count": 4
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
@@ -300,10 +313,10 @@
 				"source": [
 					"# drop the columns we dont need and see whats left\r\n",
 					"cols = ['FcstPeriod', 'BoroughID']\r\n",
-					"sampled_demand.drop(cols, axis=1, inplace=True)\r\n",
-					"sampled_demand = sampled_demand.sort_values('FcstPeriodDate')"
+					"borough.drop(cols, axis=1, inplace=True)\r\n",
+					"borough = borough.sort_values('FcstPeriodDate')"
 				],
-				"execution_count": 6
+				"execution_count": 22
 			},
 			{
 				"cell_type": "code",
@@ -320,29 +333,9 @@
 					"collapsed": true
 				},
 				"source": [
-					"sampled_demand.head(10)"
+					"borough.head(10)"
 				],
-				"execution_count": 7
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"collapsed": true
-				},
-				"source": [
-					"# Run for each borough 1 - 7\r\n",
-					"borough = sampled_demand.loc[sampled_demand['BoroughID'] == 2]"
-				],
-				"execution_count": null
+				"execution_count": 23
 			},
 			{
 				"cell_type": "code",
@@ -362,7 +355,7 @@
 					"borough = borough.set_index('FcstPeriodDate')\r\n",
 					"borough.index"
 				],
-				"execution_count": null
+				"execution_count": 24
 			},
 			{
 				"cell_type": "code",
@@ -381,7 +374,7 @@
 				"source": [
 					"borough = borough['Demand'].resample('MS').sum()"
 				],
-				"execution_count": null
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
@@ -400,26 +393,7 @@
 				"source": [
 					"borough"
 				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"collapsed": true
-				},
-				"source": [
-					"borough.info()"
-				],
-				"execution_count": null
+				"execution_count": 26
 			},
 			{
 				"cell_type": "code",
@@ -439,7 +413,7 @@
 					"borough.plot(figsize=(15, 6))\r\n",
 					"plt.show()"
 				],
-				"execution_count": null
+				"execution_count": 28
 			},
 			{
 				"cell_type": "code",
@@ -459,7 +433,7 @@
 					"from pylab import rcParams\r\n",
 					"rcParams['figure.figsize'] = 18, 8"
 				],
-				"execution_count": null
+				"execution_count": 29
 			},
 			{
 				"cell_type": "code",
@@ -480,7 +454,7 @@
 					"fig = decomposition.plot()\r\n",
 					"plt.show()"
 				],
-				"execution_count": null
+				"execution_count": 30
 			},
 			{
 				"cell_type": "markdown",
