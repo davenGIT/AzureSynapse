@@ -79,7 +79,7 @@
 					"from pyspark.mllib.evaluation import BinaryClassificationMetrics\n",
 					"from pyspark.ml.evaluation import BinaryClassificationEvaluator"
 				],
-				"execution_count": 5
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -111,7 +111,7 @@
 					"plt.rcParams['ytick.labelsize'] = 12\r\n",
 					"plt.rcParams['text.color'] = 'k'"
 				],
-				"execution_count": 6
+				"execution_count": 32
 			},
 			{
 				"cell_type": "markdown",
@@ -239,9 +239,11 @@
 					"collapsed": true
 				},
 				"source": [
-					"parquet_path = wasbs_path + 'ED33C961-7B22-439E-8FC1-642D08051DBD_70_0-1.parquet'"
+					"df_parquet = spark.read.parquet(wasbs_path + 'ED33C961-7B22-439E-8FC1-642D08051DBD_*.parquet')\r\n",
+					"\r\n",
+					""
 				],
-				"execution_count": 24
+				"execution_count": 41
 			},
 			{
 				"cell_type": "code",
@@ -258,9 +260,28 @@
 					"collapsed": true
 				},
 				"source": [
-					"df_parquet = spark.read.parquet(parquet_path)"
+					"pandas_df = df_parquet.toPandas()"
 				],
-				"execution_count": 25
+				"execution_count": 42
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"pandas_df.info()"
+				],
+				"execution_count": 43
 			},
 			{
 				"cell_type": "code",
@@ -296,93 +317,9 @@
 					"collapsed": true
 				},
 				"source": [
-					"print('the size of the data is: %d rows and  %d columns' % df_parquet.shape)"
+					"print('the size of the data is: %d rows and  %d columns' % pandas_df.shape)"
 				],
-				"execution_count": 29
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"microsoft": {
-						"language": "sparksql"
-					},
-					"collapsed": true
-				},
-				"source": [
-					"%%sql\r\n",
-					"SELECT count(*) FROM mydataframetable"
-				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"collapsed": true
-				},
-				"source": [
-					"myNewPythonDataFrame = spark.sql(\"SELECT * FROM mydataframetable\")"
-				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"metadata": {
-					"jupyter": {
-						"source_hidden": false,
-						"outputs_hidden": false
-					},
-					"nteract": {
-						"transient": {
-							"deleting": false
-						}
-					},
-					"collapsed": true
-				},
-				"source": [
-					"print(\"read data from SQL server table  \")\r\n",
-					"jdbcDF = spark.read \\\r\n",
-					"        .format(\"com.microsoft.sqlserver.jdbc.spark\") \\\r\n",
-					"        .option(\"url\", url) \\\r\n",
-					"        .option(\"dbtable\", dbtable) \\\r\n",
-					"        .option(\"user\", user) \\\r\n",
-					"        .option(\"password\", password).load()\r\n",
-					"\r\n",
-					"jdbcDF.show(5)"
-				],
-				"execution_count": null
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"from datetime import datetime\n",
-					"from dateutil import parser\n",
-					"\n",
-					"\n",
-					"end_date = parser.parse('2018-05-08 00:00:00')\n",
-					"start_date = parser.parse('2018-05-01 00:00:00')\n",
-					"\n",
-					"nyc_tlc = NycTlcYellow(start_date=start_date, end_date=end_date)\n",
-					"nyc_tlc_df = nyc_tlc.to_spark_dataframe()"
-				],
-				"execution_count": 3
+				"execution_count": 44
 			},
 			{
 				"cell_type": "code",
