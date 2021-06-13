@@ -1,5 +1,5 @@
 {
-	"name": "SQL script 2",
+	"name": "ImportUploadedData",
 	"properties": {
 		"content": {
 			"query": "use nyctaxiDB\n\n--Create aparquet file format\nCREATE EXTERNAL FILE FORMAT taxiData_file_format_GZIP\nWITH\n(  \n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.GzipCodec'\n);\n\n-- Create the aggregated data external table (limit to 2018 while testing)\nCREATE EXTERNAL TABLE tripDistanceUploaded\n(\n    TripIndex INT,\n    PULocationID INT,\n    DOLocationID INT,\n    AverageTrip FLOAT\n)\nWITH (\n    LOCATION = 'uploadedData/',\n    DATA_SOURCE = taxiDataDemo,  \n    FILE_FORMAT = taxiData_file_format_GZIP\n)  \n\n--DROP EXTERNAL TABLE tripDistanceUploaded\n\n--Select * from tripDistanceUploaded\n\n-- Create the aggregated data external table (limit to 2018 while testing)\nCREATE EXTERNAL TABLE zoneLookup\n(\n    LocationID INT,\n    Borough VARCHAR(100),\n    Zone VARCHAR(100),\n    service_zone VARCHAR(100)\n)\nWITH (\n    LOCATION = 'zoneLookup/',\n    DATA_SOURCE = taxiDataDemo,  \n    FILE_FORMAT = taxiData_file_format_GZIP\n)  \n\n--DROP EXTERNAL TABLE tripDistanceUploaded\n\nSelect * from zoneLookup\n",
