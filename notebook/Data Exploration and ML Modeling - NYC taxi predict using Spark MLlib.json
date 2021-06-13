@@ -79,7 +79,7 @@
 					"from pyspark.mllib.evaluation import BinaryClassificationMetrics\n",
 					"from pyspark.ml.evaluation import BinaryClassificationEvaluator"
 				],
-				"execution_count": 1
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -111,7 +111,7 @@
 					"plt.rcParams['ytick.labelsize'] = 12\r\n",
 					"plt.rcParams['text.color'] = 'k'"
 				],
-				"execution_count": 2
+				"execution_count": 6
 			},
 			{
 				"cell_type": "markdown",
@@ -140,12 +140,11 @@
 				},
 				"source": [
 					"%%spark\r\n",
-					"val scalaDataFrame = spark.read.sqlanalytics(\"nyctaxiDB.dbo.tripDistanceTable\")\r\n",
-					"scalaDataFrame.createOrReplaceTempView( \"mydataframetable\" )\r\n",
+					"val scalaDataFrame = spark.read.sqlanalytics(\"nyctaxiDB.dbo.ZoneDistances\")\r\n",
 					"\r\n",
 					""
 				],
-				"execution_count": 7
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -159,12 +158,13 @@
 							"deleting": false
 						}
 					},
-					"microsoft": {
-						"language": "sparksql"
-					},
 					"collapsed": true
 				},
 				"source": [
+					"scalaDataFrame.createOrReplaceTempView( \"zoneDistances\" )\r\n",
+					"\r\n",
+					"\r\n",
+					"\r\n",
 					"%%sql\r\n",
 					"SELECT * FROM mydataframetable"
 				],
