@@ -69,7 +69,7 @@
 					"from pyspark.sql.functions import *\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
@@ -103,7 +103,7 @@
 					"plt.rcParams['ytick.labelsize'] = 12\r\n",
 					"plt.rcParams['text.color'] = 'k'"
 				],
-				"execution_count": 19
+				"execution_count": 3
 			},
 			{
 				"cell_type": "markdown",
@@ -169,7 +169,7 @@
 					"\r\n",
 					"blob_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
 				],
-				"execution_count": 3
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -191,7 +191,7 @@
 					"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (blob_container_name, blob_account_name), blob_sas_token)\r\n",
 					"print('Remote blob path: ' + wasbs_path)"
 				],
-				"execution_count": 4
+				"execution_count": 5
 			},
 			{
 				"cell_type": "code",
@@ -209,9 +209,9 @@
 				},
 				"source": [
 					"# Use a wildcard to load all the parquet files in the folder to a data frame\r\n",
-					"demand_df = spark.read.parquet(wasbs_path + '17EC7D74-3ACC-4004-8CB5-BAA4F860E162_*.parquet')"
+					"demand_df = spark.read.parquet(wasbs_path + '89EB4294-7661-4D28-BA8F-843929EDCF1D_*.parquet')"
 				],
-				"execution_count": 5
+				"execution_count": 31
 			},
 			{
 				"cell_type": "code",
@@ -231,7 +231,7 @@
 					"# Get data into a pandas dataframe\r\n",
 					"demand = demand_df.toPandas()"
 				],
-				"execution_count": 15
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -274,7 +274,7 @@
 					"# A quick check - is the record count the same as SQL   \r\n",
 					"demand.info() "
 				],
-				"execution_count": 16
+				"execution_count": 9
 			},
 			{
 				"cell_type": "code",
@@ -292,9 +292,29 @@
 				},
 				"source": [
 					"# Run for each borough 1 - 7\r\n",
-					"borough = demand.loc[demand['BoroughID'] == 1]"
+					"borough = demand.loc[demand['BoroughID'] == 4]"
 				],
-				"execution_count": 17
+				"execution_count": 12
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"# Just testing - should loop through trips\r\n",
+					"borough = borough.loc[demand['TripIndex'] == 1236050]"
+				],
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -312,11 +332,11 @@
 				},
 				"source": [
 					"# drop the columns we dont need and see whats left\r\n",
-					"cols = ['FcstPeriod', 'BoroughID']\r\n",
+					"cols = ['FcstPeriod', 'BoroughID', 'TripIndex']\r\n",
 					"borough.drop(cols, axis=1, inplace=True)\r\n",
 					"borough = borough.sort_values('FcstPeriodDate')"
 				],
-				"execution_count": 22
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -335,7 +355,7 @@
 				"source": [
 					"borough.head(10)"
 				],
-				"execution_count": 23
+				"execution_count": 15
 			},
 			{
 				"cell_type": "code",
@@ -355,7 +375,7 @@
 					"borough = borough.set_index('FcstPeriodDate')\r\n",
 					"borough.index"
 				],
-				"execution_count": 24
+				"execution_count": 16
 			},
 			{
 				"cell_type": "code",
@@ -374,7 +394,7 @@
 				"source": [
 					"borough = borough['Demand'].resample('MS').sum()"
 				],
-				"execution_count": 25
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
@@ -393,7 +413,7 @@
 				"source": [
 					"borough"
 				],
-				"execution_count": 26
+				"execution_count": 18
 			},
 			{
 				"cell_type": "code",
@@ -413,7 +433,7 @@
 					"borough.plot(figsize=(15, 6))\r\n",
 					"plt.show()"
 				],
-				"execution_count": 28
+				"execution_count": 19
 			},
 			{
 				"cell_type": "code",
@@ -433,7 +453,7 @@
 					"from pylab import rcParams\r\n",
 					"rcParams['figure.figsize'] = 18, 8"
 				],
-				"execution_count": 29
+				"execution_count": 30
 			},
 			{
 				"cell_type": "code",
@@ -454,7 +474,7 @@
 					"fig = decomposition.plot()\r\n",
 					"plt.show()"
 				],
-				"execution_count": 30
+				"execution_count": 29
 			},
 			{
 				"cell_type": "markdown",
@@ -490,6 +510,25 @@
 					"pdq = list(itertools.product(p, d, q))\r\n",
 					"seasonal_pdq = [(x[0], x[1], x[2], 12) for x in list(itertools.product(p, d, q))]"
 				],
+				"execution_count": 28
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					""
+				],
 				"execution_count": null
 			},
 			{
@@ -510,13 +549,13 @@
 					"for param in pdq:\r\n",
 					"    for param_seasonal in seasonal_pdq:\r\n",
 					"        try:\r\n",
-					"            mod = sm.tsa.statespace.SARIMAX(y, order=param, seasonal_order=param_seasonal, enforce_stationarity=False, enforce_invertibility=False)\r\n",
+					"            mod = sm.tsa.statespace.SARIMAX(borough, order=param, seasonal_order=param_seasonal, enforce_stationarity=False, enforce_invertibility=False)\r\n",
 					"            results = mod.fit()    \r\n",
 					"            print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))          \r\n",
 					"        except:\r\n",
 					"            continue"
 				],
-				"execution_count": null
+				"execution_count": 27
 			},
 			{
 				"cell_type": "code",
@@ -534,13 +573,13 @@
 				},
 				"source": [
 					"# Select the parameters for the lowest AIC\r\n",
-					"mod = sm.tsa.statespace.SARIMAX(y,\r\n",
+					"mod = sm.tsa.statespace.SARIMAX(borough,\r\n",
 					"                                order=(1, 1, 1),\r\n",
 					"                                seasonal_order=(1, 1, 0, 12),\r\n",
 					"                                enforce_stationarity=False,\r\n",
 					"                                enforce_invertibility=False)"
 				],
-				"execution_count": null
+				"execution_count": 25
 			},
 			{
 				"cell_type": "code",
