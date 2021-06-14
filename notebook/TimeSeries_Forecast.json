@@ -487,7 +487,7 @@
 					"pdq = list(itertools.product(p, d, q))\r\n",
 					"seasonal_pdq = [(x[0], x[1], x[2], 12) for x in list(itertools.product(p, d, q))]"
 				],
-				"execution_count": 66
+				"execution_count": 68
 			},
 			{
 				"cell_type": "code",
@@ -511,7 +511,7 @@
 					"for param in pdq:\r\n",
 					"    for param_seasonal in seasonal_pdq:\r\n",
 					"        try:\r\n",
-					"            mod = sm.tsa.statespace.SARIMAX(borough, order=param, seasonal_order=param_seasonal, enforce_stationarity=False, enforce_invertibility=False)\r\n",
+					"            mod = sm.tsa.statespace.SARIMAX(borough, order=param, seasonal_order=param_seasonal, trend='t', )\r\n",
 					"            results = mod.fit()\r\n",
 					"            if results.aic < lowest_aic:\r\n",
 					"                lowest_aic = results.aic\r\n",
@@ -524,7 +524,7 @@
 					"print('lowest model - %s - %s aic: %s' % (lowest_param, lowest_seasonal_param, lowest_aic))          \r\n",
 					""
 				],
-				"execution_count": 49
+				"execution_count": 67
 			},
 			{
 				"cell_type": "code",
