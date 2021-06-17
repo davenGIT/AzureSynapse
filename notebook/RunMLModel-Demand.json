@@ -58,7 +58,7 @@
 					"from azureml.train.automl import AutoMLConfig\n",
 					"from azureml.data.dataset_factory import TabularDatasetFactory"
 				],
-				"execution_count": 1
+				"execution_count": 36
 			},
 			{
 				"cell_type": "code",
@@ -66,55 +66,38 @@
 					"subscription_id = \"c75f6bab-9d6a-4ee1-b464-a3beae73063c\"\n",
 					"resource_group = \"dnmay25Demo\"\n",
 					"workspace_name = \"dnmay25Demomlws\"\n",
-					"experiment_name = \"dnmay25demows-hourlyzonedemand-20210616103935\"\n",
+					"experiment_name = \"dnmay25demows-hourlyzonedemand-20210616045820\"\n",
 					"\n",
 					"ws = Workspace(subscription_id = subscription_id, resource_group = resource_group, workspace_name = workspace_name)\n",
-					"experiment = Experiment(ws, experiment_name)"
-				],
-				"execution_count": 2
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"df = spark.sql(\"SELECT * FROM default.hourlyzonedemand\")\n",
+					"experiment = Experiment(ws, experiment_name)\n",
 					"\n",
-					"datastore = Datastore.get_default(ws)\n",
-					"dataset = TabularDatasetFactory.register_spark_dataframe(df, datastore, name = experiment_name + \"-dataset\")"
+					""
 				],
-				"execution_count": 3
+				"execution_count": 33
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"run = ws.get_run(\"AutoML_641cab3f-78a3-49f8-851a-b02d9d0d9472\")\r\n",
+					""
+				],
+				"execution_count": 34
 			},
 			{
 				"cell_type": "code",
 				"source": [
-					"automl_config = AutoMLConfig(spark_context = sc,\n",
-					"                             task = \"regression\",\n",
-					"                             training_data = dataset,\n",
-					"                             label_column_name = \"Demand\",\n",
-					"                             primary_metric = \"spearman_correlation\",\n",
-					"                             experiment_timeout_hours = 3,\n",
-					"                             max_concurrent_iterations = 2,\n",
-					"                             enable_onnx_compatible_models = False)"
-				],
-				"execution_count": 4
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"run = experiment.submit(automl_config)"
-				],
-				"execution_count": 5
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"displayHTML(\"<a href={} target='_blank'>Your experiment in Azure Machine Learning portal: {}</a>\".format(run.get_portal_url(), run.id))"
-				],
-				"execution_count": 6
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					"run.wait_for_completion()\n",
 					"\n",
 					"import mlflow\n",
 					"\n",
@@ -131,9 +114,261 @@
 					"    mlflow.sklearn.log_model(non_onnx_model, artifact_path)\n",
 					"\n",
 					"    # Register the model to AML model registry\n",
-					"    mlflow.register_model(\"runs:/\" + run.info.run_id + \"/\" + artifact_path, \"dnmay25demows-hourlyzonedemand-20210616103935-Best\")"
+					"    mlflow.register_model(\"runs:/\" + run.info.run_id + \"/\" + artifact_path, \"dnmay25demows-hourlyzonedemand-20210616045820-Best\")"
 				],
-				"execution_count": 7
+				"execution_count": 17
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core.model import Model\r\n",
+					"model = Model(ws, 'dnmay25demows-hourlyzonedemand-20210616045820-Best', version=2)\r\n",
+					"\r\n",
+					"model_path = model.get_model_path('dnmay25demows-hourlyzonedemand-20210616045820-Best', 2, ws)\r\n",
+					"\r\n",
+					"print(model_path)"
+				],
+				"execution_count": 35
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Create Environment"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import sklearn\r\n",
+					"\r\n",
+					"from azureml.core.environment import Environment\r\n",
+					"\r\n",
+					"environment = Environment(\"LocalDeploy\")\r\n",
+					"environment.python.conda_dependencies.add_pip_package(\"inference-schema[numpy-support]\")\r\n",
+					"environment.python.conda_dependencies.add_pip_package(\"joblib\")\r\n",
+					"environment.python.conda_dependencies.add_pip_package(\"scikit-learn=={}\".format(sklearn.__version__))"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"%%writefile score.py\r\n",
+					"import joblib\r\n",
+					"import json\r\n",
+					"import numpy as np\r\n",
+					"import os\r\n",
+					"\r\n",
+					"from inference_schema.schema_decorators import input_schema, output_schema\r\n",
+					"from inference_schema.parameter_types.numpy_parameter_type import NumpyParameterType\r\n",
+					"\r\n",
+					"def init():\r\n",
+					"    global model\r\n",
+					"    model_path = 'azureml-models/dnmay25demows-hourlyzonedemand-20210616103935-Best/2/dnmay25demows-hourlyzonedemand-20210616045820_artifact/model.pkl')\r\n",
+					"    # Deserialize the model file back into a sklearn model.\r\n",
+					"    model = joblib.load(model_path)\r\n",
+					"\r\n",
+					"input_sample = np.array([[2018052819, 239, 1239237, '2018-05-28T19:00', 2018, 5, 28, 19, 0, 1]])\r\n",
+					"output_sample = np.array([3726.995])\r\n",
+					"\r\n",
+					"@input_schema('data', NumpyParameterType(input_sample))\r\n",
+					"@output_schema(NumpyParameterType(output_sample))\r\n",
+					"def run(data):\r\n",
+					"    try:\r\n",
+					"        result = model.predict(data)\r\n",
+					"        # You can return any JSON-serializable object.\r\n",
+					"        return result.tolist()\r\n",
+					"    except Exception as e:\r\n",
+					"        error = str(e)\r\n",
+					"        return error"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core.model import InferenceConfig\r\n",
+					"\r\n",
+					"inference_config = InferenceConfig(entry_script=\"score.py\",\r\n",
+					"                                   environment=environment)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"from azureml.core.webservice import LocalWebservice\r\n",
+					"\r\n",
+					"# This is optional, if not provided Docker will choose a random unused port.\r\n",
+					"deployment_config = LocalWebservice.deploy_configuration(port=6789)\r\n",
+					"\r\n",
+					"local_service = Model.deploy(ws, \"test\", [model], inference_config, deployment_config)\r\n",
+					"\r\n",
+					"local_service.wait_for_deployment()"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"print('Local service port: {}'.format(local_service.port))"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"print(local_service.get_logs())"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "markdown",
+				"metadata": {
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"## Test Web Service"
+				]
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					"import json\r\n",
+					"\r\n",
+					"sample_input = json.dumps({\r\n",
+					"    'data': dataset_x[0:2].tolist()\r\n",
+					"})\r\n",
+					"\r\n",
+					"local_service.run(sample_input)"
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					},
+					"collapsed": true
+				},
+				"source": [
+					""
+				],
+				"execution_count": null
 			}
 		]
 	}
